@@ -46,10 +46,10 @@ async function githubFetch(request, token, otherheaders = {}){
 // -----------------------------------------
 const PAGES = {
   '/': {
-    name: 'Home',
+    name: '/',
     parent: null,
     child: ['/projects.html', '/contacts.html', 'cv.pdf'],
-    aliases: ['Home', '~']
+    aliases: ['/', '~']
   },
   '/projects.html': {
     name: 'Projets',
@@ -89,14 +89,14 @@ function commandLine(req){
 
 function cd(argument, currentDir){
   const page = PAGES[currentDir];
-  let path = null;
+  let path = '';
 
-  if (argument === '~')
+  if (argument === '/' || argument === '~')
     path = '/';
   if (argument === '..')
     path = page.parent;
 
-  if (path === null && page.child !== null)
+  if (path === '' && page.child !== null)
   {
     for (const dest of page.child) {
       if (dest.endsWith('.html'))
@@ -113,17 +113,17 @@ function cd(argument, currentDir){
 
   return {
     result : path,
-    success : path === null ? false : true
+    success : path === '' ? false : true
   };
 }
 
 function ls(currentDir){
   const page = PAGES[currentDir];
-  let childDir = [];
+  let childDir = '';
 
   if (page.parent !== null)
   {
-    childDir.push('..');
+    childDir += `<span style="color:var(--blue)">..</span>`;
   }
 
   if (page.child !== null)
@@ -131,17 +131,17 @@ function ls(currentDir){
     for (const dest of page.child) {
       if (!dest.endsWith('.html'))
       {
-        childDir.push(dest);
+        childDir += `<span style="color:var(--green)">${dest}</span>`;
         break;
       }
       const name = PAGES[dest].name;
-      childDir.push(name);
+      childDir += `<span style="color:var(--blue)">${name}</span>`;
     }
   }
 
   return  {
     result: childDir,
-    success: childDir.length === 0 ? false : true
+    success: childDir === '' ? false : true
   }
 }
 
@@ -149,16 +149,17 @@ function pwd(currentDir){
   let page = PAGES[currentDir];
   let path = '';
 
-  while (page.name !== 'Home')
+  while (page.name !== '/')
   {
-    path = page.name + '/' + path;
+    path = '/' + page.name + path;
     page = PAGES[page.parent];
   }
 
-  path = page.name + '/' + path;
+  if (path === '')
+    path = '/';
 
   return {
-    result: path,
+    result: `<p>${path}</p>`,
     success: true
   }
 }

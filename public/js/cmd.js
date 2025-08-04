@@ -1,5 +1,6 @@
 const cmdInput = document.getElementById("cmdInput");
-const cmdResult = document.getElementById("cmdResult");
+const cmdOutput = document.getElementById("cmdOutput");
+let lastOutput = '';
 
 cmdInput.addEventListener('blur', () => {
   cmdInput.focus();
@@ -40,15 +41,19 @@ cmdInput.addEventListener('keydown', async (event) => {
             break;
 
           case "ls":
-            cmdResult.textContent = resJson.result;
+            cmdOutput.innerHTML = resJson.result;
             break;
 
           case "pwd":
-            cmdResult.textContent = resJson.result;
+            cmdOutput.innerHTML = resJson.result;
             break;
         }
       }
     }
     cmdInput.value = '';
+  }
+  else
+  {
+    cmdOutput.innerHTML = '';
   }
 });

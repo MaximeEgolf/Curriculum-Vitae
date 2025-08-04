@@ -1,7 +1,7 @@
 /* Base */
 :root {
   --black: #1a1a1a;
-  --light-grey: #2d2d2d;
+  --mid-grey: #2d2d2d;
   --dark-grey: #212121;
   --white: #ffffff;
   --green:#55dd55;
@@ -74,13 +74,17 @@ a {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  text-align: center;
 
   padding: 1em 2em;
-  background-color: var(--light-grey);
+  background-color: var(--mid-grey);
 }
 
-.header-content input {
+.prompt-io {
+  display: inline-block;
+  position: relative;
+}
+
+#cmdInput {
   font-family: inherit;
   font-size: 1rem;
 
@@ -93,9 +97,12 @@ a {
   color: var(--white);
 }
 
-@media (max-width:600px)
-{
-
+#cmdOutput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 10px;
 }
 
 .main {
@@ -113,7 +120,7 @@ a {
   gap: 1em;
   border-radius: 1em;
   padding: 1.5em 1.5em;
-  background-color: var(--light-grey);
+  background-color: var(--mid-grey);
 }
 
 .presentation {
@@ -123,6 +130,27 @@ a {
 
   gap: 1em;
   width: 35ch;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 1em;
+  width: 35ch;
+}
+
+.contact a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.svg-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 #user {
@@ -149,7 +177,7 @@ a {
   padding: 2em 2em;
   border-radius: 1em;
 
-  background-color: var(--light-grey);
+  background-color: var(--mid-grey);
 }
 
 .projectHeader {
@@ -165,7 +193,7 @@ a {
   text-align: center;
 
   padding: 1em 2em;
-  background-color: var(--light-grey);
+  background-color: var(--mid-grey);
 }
 
 .error {
