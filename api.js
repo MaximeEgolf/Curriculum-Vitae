@@ -94,7 +94,7 @@ function cd(argument, currentDir){
   if (argument === '/' || argument === '~')
     path = '/';
   if (argument === '..')
-    path = page.parent;
+    path = page.parent == null ? '': page.parent;
 
   if (path === '' && page.child !== null)
   {

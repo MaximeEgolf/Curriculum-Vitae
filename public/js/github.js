@@ -17,7 +17,7 @@ async function gitHubApiCall() {
       const date = new Date(project.date);
 
       projects.innerHTML += `<div class="project">
-                              <div class="projectHeader">
+                              <div class="project-header">
                                 <h1>${project.name}</h1>
                                 <div>
                                   <h4>${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}</h4>
@@ -28,10 +28,13 @@ async function gitHubApiCall() {
                               ${project.readMe}
                              </div>`;
     }
+
+  document.getElementById('projects').classList.add('projects-loaded');
+
   }
   catch (error) {
     console.error(error);
   }
 }
 
-// gitHubApiCall();
+gitHubApiCall();

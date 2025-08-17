@@ -1,5 +1,5 @@
-const cmdInput = document.getElementById("cmdInput");
-const cmdOutput = document.getElementById("cmdOutput");
+const cmdInput = document.getElementById("cmd-input");
+const cmdOutput = document.getElementById("cmd-output");
 let lastOutput = '';
 
 cmdInput.addEventListener('blur', () => {
