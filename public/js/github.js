@@ -10,27 +10,46 @@ const specialCases = {
   "HTML": "html5",
   "CSS": "css3"
 }
-const months = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const months = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre"
+];
 
 // Functions
 async function gitHubApiCall() {
   try {
-    const githubRes = await fetch('http://localhost:3000/api/github');
-    const githubResJson  = await githubRes.json();
+    const res = await fetch('http://localhost:3000/api/github');
+    const resJson  = await res.json();
 
-    if (githubResJson.from != '/api/github')
-      throw new Error(`Called api ${githubResJson.from} instead of /api/github`);
+    if (resJson.from != '/api/github')
+      throw new Error(`Called api ${resJson.from} instead of /api/github`);
 
-    for (const key in githubResJson.result) {
-      const project = githubResJson.result[key];
+    for (const key in resJson.result) {
+      const project = resJson.result[key];
       const date = new Date(project.date);
 
-      const languagesHTML = Object.entries(project.language).map(([name, numberOfLines]) =>
+      const nbTotalWords = Object.values(project.language).reduce((sum, value) => sum + value, 0);
+      const languagesHTML = Object.entries(project.language).map(([name, nbWords]) =>
       {
         const simpleIconName = specialCases[name] || name.toLowerCase();
-        return `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${simpleIconName}/${simpleIconName}-original.svg"
-                     alt="${name} logo"
-                     style="width: 50px; height: 50px; margin: 5px;">`
+        return `<div class="project-language">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${simpleIconName}/${simpleIconName}-original.svg"
+                         alt="${name}"
+                         style="width: 50px; height: 50px; margin: 5px;"
+                         onerror="this.src='../images/iconFallback.svg'; this.onerror=null;">
+                    <p>${name}</p>
+                    <p>(${(nbWords/nbTotalWords*100).toFixed(2)}%)</p>
+                </div>`
       }).join('');
 
       projects.innerHTML += `<div class="project">
@@ -49,7 +68,7 @@ async function gitHubApiCall() {
                               </div>
                               <h2>Approfondissement</h2>
                               <div class="project-readme">
-                                ${project.readMe.success ? project.readMe.result : '(Ce projet ne contient malheureusemnet pas de README.md)'}
+                                ${project.readMe.success ? project.readMe.result : '(Ce projet ne contient malheureusement pas de README.md)'}
                               </div>
                               <h2>Langages utilisés</h2>
                               <div class="project-languages">

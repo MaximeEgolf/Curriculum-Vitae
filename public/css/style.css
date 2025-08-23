@@ -214,15 +214,21 @@ a {
   font-size: 0.9rem;
 }
 
-.project-readme {
-  padding-bottom: 1rem;
+.project-languages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1em;
+}
+
+.project-language {
+  text-align: center;
 }
 
 .contact {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1em;
+  gap: 2em;
   width: 35ch;
   max-width: 100%;
 }
