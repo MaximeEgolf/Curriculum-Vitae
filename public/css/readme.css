@@ -1,7 +1,6 @@
 /* NEW: README content styling */
 .md {
   text-align: left;
-  margin-top: 1.5rem;
 }
 
 .markdown-body {
@@ -34,6 +33,7 @@
 }
 
 .markdown-body p {
+  margin-top: 1rem;
   margin-bottom: 1rem;
 }
 

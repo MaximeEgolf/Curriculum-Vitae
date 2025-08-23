@@ -1,44 +1,108 @@
 // -----------------------------------------
 // Github
 // -----------------------------------------
-async function userGithubRepos(user, token){
-  try {
-    const reposRes = await githubFetch(`https://api.github.com/users/${user}/repos?sort=updated&direction=desc`, token);
-    const reposResJson = await reposRes.json();
+class GithubAPI
+{
+  constructor(token)
+  {
+    this.token = token;
+    this.baseURL = "https://api.github.com";
+  }
 
-    const repoData = [];
-    for (const repo of reposResJson) {
-      const languageRes = await githubFetch(`https://api.github.com/repos/${user}/${repo.name}/languages`, token);
-      const languageResJson = await languageRes.json();
-
-      const readMeRes = await githubFetch(`https://api.github.com/repos/${user}/${repo.name}/readme`, token, {'Accept': 'application/vnd.github.html'});
-      const readMeResHtml = await readMeRes.text();
-
-      repoData.push({
-        name: repo.name,
-        date: repo.pushed_at,
-        description: repo.description,
-        readMe: readMeResHtml,
-        language: languageResJson
+  async fetch(extURL, additionnalHeaders = {})
+  {
+    try {
+      const response = await fetch(`${this.baseURL}/${extURL}` , {
+        headers: {
+          'Authorization': `token ${this.token}`,
+          ...additionnalHeaders
+        }
       });
+
+      return response;
     }
+
+    catch (error) {
+      throw new Error(`Github fetch has got errors: ${error.message}`);
+    }
+  }
+
+  async getRepos(user)
+  {
+    const options = `sort=updated&direction=desc`
+    const url = `users/${user}/repos?${options}`
+    const response = await this.fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user repositories: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async getRepoLanguages(user, repo)
+  {
+    const url = `repos/${user}/${repo}/languages`;
+    const response = await this.fetch(url);
+
+    if (!response.ok) {
+      console.error(`Failed to fetch languages for ${repo} of user: ${user}`)
+    }
+
+    return response.json();
+  }
+
+  async getRepoReadme(user, repo)
+  {
+    const url = `repos/${user}/${repo}/readme`;
+    const response = await this.fetch(url, {'Accept': 'application/vnd.github.html'});
+
+    if (response.ok) {
+      const html = await response.text();
+      return { result: html, success: true}
+    }
+    else
+    {
+      const json = await response.json();
+      return { result: json, success: false}
+    }
+  }
+
+  async getData(user)
+  {
+    // 1st: Get repositories from the user
+    const repos = await this.getRepos(user);
+
+    // 2nd: Get through each repositories for programming languages + README.md
+    const repoData = await Promise.all(
+      repos.map(async (repo) => {
+        const [languages, readme] = await Promise.all([
+          this.getRepoLanguages(user, repo.name),
+          this.getRepoReadme(user, repo.name)
+        ]);
+
+        return {
+          name: repo.name,
+          url: repo.html_url,
+          date: repo.pushed_at,
+          description: repo.description,
+          language: languages || {},
+          readMe: readme || {},
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          isPrivate: repo.private
+        };
+      })
+    );
 
     return repoData;
   }
-
-  catch(error) {
-    throw new Error(error);
-  }
 }
 
-async function githubFetch(request, token, otherheaders = {}){
-  return await fetch(request, {
-      headers: {
-        'Authorization': `token ${token}`,
-        ...otherheaders
-      }
-    }
-  )
+async function getGithubData(user, token)
+{
+  const githubApi = new GithubAPI(token)
+  return githubApi.getData(user);
 }
 
 // -----------------------------------------
@@ -48,109 +112,106 @@ const PAGES = {
   '/': {
     name: '/',
     parent: null,
-    child: ['/projects.html', '/contacts.html', 'cv.pdf'],
+    children: ['/projects.html', '/contacts.html', 'CV.pdf'],
     aliases: ['/', '~']
   },
   '/projects.html': {
     name: 'Projets',
     parent: '/',
-    child: null,
+    children: null,
     aliases: ['Projets', 'projects.html']
   },
   '/contacts.html': {
     name: 'Contacts',
     parent: '/',
-    child: null,
+    children: null,
     aliases: ['Contacts', 'contacts.html']
   }
 };
 
-function commandLine(req){
-  const command = req.body.command;
-  const argument = req.body.argument;
-  const currentDir = req.body.currentDir;
-
-  let res = undefined;
-
-  switch (command)
-  {
-    case "pwd":
-      res = pwd(currentDir);
-      break;
-    case "cd":
-      res = cd(argument, currentDir);
-      break;
-    case "ls":
-      res = ls(currentDir);
-      break;
-  }
-  return res;
+const COMMANDS = {
+  pwd: (args, dir) => pwd(args, dir),
+  cd: (args, dir) => cd(args, dir),
+  ls: (args, dir) => ls(args, dir),
 }
 
-function cd(argument, currentDir){
+// -----------------------------------------
+// Helpers (command line)
+// -----------------------------------------
+function resolveAlias(args, currentDir){
   const page = PAGES[currentDir];
-  let path = '';
 
-  if (argument === '/' || argument === '~')
-    path = '/';
-  if (argument === '..')
-    path = page.parent == null ? '': page.parent;
+  if (!page)
+    return null;
 
-  if (path === '' && page.child !== null)
-  {
-    for (const dest of page.child) {
+  if (args === '/' || args === '~')
+    return '/';
+  if (args === '..')
+    return page.parent ?? '';
+
+  if (page.children) {
+    for (const dest of page.children) {
+      // Skips files
       if (dest.endsWith('.html'))
       {
-        const aliases = PAGES[dest].aliases;
-        if (aliases.includes(argument))
-        {
-          path = dest;
-          break;
-        }
+        const aliases = PAGES[dest].aliases || [];
+        if (aliases.includes(args))
+          return dest;
       }
     }
   }
-
-  return {
-    result : path,
-    success : path === '' ? false : true
-  };
+  return '';
 }
 
-function ls(currentDir){
+function formatChildren(currentDir) {
   const page = PAGES[currentDir];
-  let childDir = '';
 
-  if (page.parent !== null)
-  {
-    childDir += `<span style="color:var(--blue)">..</span>`;
-  }
+  const entries = [];
+  if (page.parent)
+    entries.push({name: "..", type: "dir"});
 
-  if (page.child !== null)
-  {
-    for (const dest of page.child) {
+  if (page.children) {
+    for (const dest of page.children) {
       if (!dest.endsWith('.html'))
-      {
-        childDir += `<span style="color:var(--green)">${dest}</span>`;
-        break;
-      }
-      const name = PAGES[dest].name;
-      childDir += `<span style="color:var(--blue)">${name}</span>`;
+        entries.push({name: `${dest}`, type: "file"});
+      else
+        entries.push({name: `${PAGES[dest].name}`, type: "dir"});
     }
   }
-
-  return  {
-    result: childDir,
-    success: childDir === '' ? false : true
-  }
+  return entries;
 }
 
-function pwd(currentDir){
+function badFormat(cmd) {
+  return { result: `Erreur de format pour '${cmd}'`, success: false, cmd };
+}
+
+// -----------------------------------------
+// Commands (command line)
+// -----------------------------------------
+function cd(args, currentDir){
+  if (args.length !== 1)
+    return badFormat("cd");
+
+  const path = resolveAlias(args[0], currentDir);
+  return {result : path, success : path !== '', cmd: "cd"};
+}
+
+function ls(args, currentDir) {
+  if (args.length)
+    return badFormat("ls");
+
+  const entries = formatChildren(currentDir);
+  return { result: entries, success: entries.length > 0, cmd: "ls"};
+}
+
+function pwd(args, currentDir){
+  if (args.length)
+    return badFormat("pwd");
+
   let page = PAGES[currentDir];
   let path = '';
 
-  while (page.name !== '/')
-  {
+  while (page.name !== '/'){
     path = '/' + page.name + path;
     page = PAGES[page.parent];
   }
@@ -158,13 +219,21 @@ function pwd(currentDir){
   if (path === '')
     path = '/';
 
-  return {
-    result: `<p>${path}</p>`,
-    success: true
-  }
+  return {result: path, success: true, cmd: "pwd"}
+}
+
+function postCommandLine(req){
+  const {command, currentDir} = req.body;
+  const commandWords = command.trim().split(/\s+/);
+
+  const cmd = COMMANDS[commandWords[0]];
+  if (!cmd)
+    return {result : "Tapez 'help' pour aide", success : false, cmd: undefined};
+
+  return cmd(commandWords.slice(1), currentDir);
 }
 
 export {
-  userGithubRepos as github,
-  commandLine as cmdLine
+  getGithubData,
+  postCommandLine
 }

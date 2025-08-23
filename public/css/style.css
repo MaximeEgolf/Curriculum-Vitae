@@ -31,7 +31,7 @@ body {
   height: 100vh;
   max-width: 100vw;
   font-family: "Hack", "monospace";
-  font-size: 1rem;
+  font-size: clamp(14px, 2vw, 18px);
   color: var(--white);
   background-color: var(--black);
   overflow-x: hidden;
@@ -75,48 +75,44 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
   height: var(--header-height);
   z-index: 100;
   background-color: var(--mid-grey);
   border-bottom: 1px solid var(--white);
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 1em 2em;
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  padding: 1em 2em;
-  height: 100%;
-  background-color: var(--mid-grey);
+  width: 100%;
+  gap: 1ch;
 }
 
 .prompt-io {
-  display: inline-block;
   position: relative;
-  min-width: 0;
+  flex: 1;
 }
 
 #cmd-input {
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1em;
   background: transparent;
   border: none;
   outline: none;
-  line-height: 1.0;
   caret-color: var(--white);
   color: var(--white);
   width: 100%;
-  min-width: 100px;
 }
 
 #cmd-output {
   position: absolute;
   top: 0;
-  left: 1px;
-  display: flex;
-  gap: 10px;
-  opacity: 35%;
+  left: 0;
+  opacity: 0.35;
+  text-align: left;
 }
 
 /* Main content */
@@ -131,6 +127,9 @@ a {
   padding: 2rem 1rem;
   overflow-y: auto;
   min-height: calc(100vh - var(--header-height) - var(--footer-height));
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* Projects */
@@ -164,17 +163,13 @@ a {
 
 #user {
   border-radius: 50%;
-  width: 150px;
-  height: 150px;
-  min-width: 100px;
-  max-width: 100%;
-  height: auto;
+  width: clamp(125px, 25vw, 150px);
   aspect-ratio: 1;
 }
 
 .btn-group {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1em;
   width: auto;
   min-width: 200px;
@@ -202,18 +197,25 @@ a {
   box-sizing: border-box;
 }
 
+.project > * {
+  padding-bottom: 1rem;
+}
+
 .project-header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .project-date {
   text-align: right;
   font-size: 0.9rem;
+}
+
+.project-readme {
+  padding-bottom: 1rem;
 }
 
 .contact {
@@ -275,10 +277,18 @@ a {
     flex-direction: column;
   }
 
-@media (max-width: 550px) {
+  .btn-group {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 475px) {
   .header-content {
     flex-direction: column;
     text-align: center;
   }
-}
+
+  .btn-group {
+    grid-template-columns: 1fr;
+  }
 }

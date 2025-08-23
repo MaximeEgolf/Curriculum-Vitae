@@ -1,6 +1,6 @@
 import path from 'path';
 import url from 'url';
-import {github, cmdLine} from './api.js';
+import {getGithubData, postCommandLine} from './api.js';
 
 import express from 'express';
 const app = express();
@@ -24,14 +24,14 @@ app.get("/", (req, res) => {
 
 app.get("/api/github", async (req, res) =>
 {
-  const githubRes = await github(process.env.USER, process.env.GITHUB_TOKEN);
-  res.json({from: req.path, value: githubRes});
+  const githubDataRes = await getGithubData(process.env.USER, process.env.GITHUB_TOKEN);
+  res.json({from: req.path, result: githubDataRes});
 });
 
 app.post("/api/commandLine", (req, res) =>
 {
-  const cmdLineRes = cmdLine(req);
-  res.json({ result: cmdLineRes.result, success: cmdLineRes.success });
+  const commandLineRes = postCommandLine(req);
+  res.json({from: req.path, result: commandLineRes.result, success: commandLineRes.success, cmd: commandLineRes.cmd});
 });
 
 app.use((req, res) => {
