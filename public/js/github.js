@@ -62,15 +62,15 @@ async function gitHubApiCall() {
                                   <i>${date.getHours()}h${date.getMinutes() < 10 ? '0':''}${date.getMinutes()}</i>
                                 </div>
                               </div>
-                              <h2>Description</h2>
+                              <h3>Description</h3>
                               <div class="project-description">
                                 <p>${project.description ?? '(Ce projet ne contient malheureusement pas de description)'}</p>
                               </div>
-                              <h2>Approfondissement</h2>
+                              <h3>Approfondissement</h3>
                               <div class="project-readme">
                                 ${project.readMe.success ? project.readMe.result : '(Ce projet ne contient malheureusement pas de README.md)'}
                               </div>
-                              <h2>Langages utilisés</h2>
+                              <h3>Langages utilisés</h3>
                               <div class="project-languages">
                               ${languagesHTML}
                               </div>

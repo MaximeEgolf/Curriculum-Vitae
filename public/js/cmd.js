@@ -29,9 +29,9 @@ cmdInput.addEventListener('keydown', async (event) => {
             cmdOutput.innerHTML = '';
             for (const dest of resJson.result) {
               if (dest.type === "file")
-                cmdOutput.innerHTML += `<span style="color:var(--green)">${dest.name}</span> `;
+                cmdOutput.innerHTML += `<span class="color-green">${dest.name}</span> `;
               else if (dest.type === "dir")
-                cmdOutput.innerHTML += `<span style="color:var(--blue)">${dest.name}</span> `;
+                cmdOutput.innerHTML += `<span class="color-blue"">${dest.name}</span> `;
             }
             break;
 
@@ -41,7 +41,7 @@ cmdInput.addEventListener('keydown', async (event) => {
         }
       }
       else {
-        cmdOutput.innerHTML += `<span style="color:var(--red)">${resJson.result}</span>`
+        cmdOutput.innerHTML += `<span class="color-red">${resJson.result}</span>`
       }
       cmdInput.value = '';
     }
