@@ -1,6 +1,36 @@
-#How to make it work
-1. Clone the repository
-2. Create a .env with PORT=3000, USER="YourGitHubUserName" and GITHUB_TOKEN="YourGitHubToken"
-3. Execute the following command: node server.js
-4. Connect to localhost:3000
-5. It should work :)
+# Project Setup
+
+This project requires Node.js and a GitHub access token to run.
+
+## Prerequisites
+
+- Node.js (v16 or later recommended)
+- A GitHub account
+- A GitHub Personal Access Token
+
+## Installation & Usage
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   
+## Install dependencies (if applicable):
+
+npm install
+
+## Create a .env file at the root of the project with the following content:
+
+PORT=3000
+USER=YourGitHubUserName
+GITHUB_TOKEN=YourGitHubToken
+
+⚠️ Important: Never commit your .env file or GitHub token to a public repository.
+
+## Start the server:
+
+node server.js
+
+## Open your browser and navigate to:
+
+http://localhost:3000
